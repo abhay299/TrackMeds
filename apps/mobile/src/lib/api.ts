@@ -13,6 +13,16 @@ export class ApiError extends Error {
   }
 }
 
+async function errorText(res: Response): Promise<string> {
+  // FastAPI puts the reason in {"detail": ...}; fall back to raw text.
+  try {
+    const body = await res.json();
+    return typeof body?.detail === 'string' ? body.detail : JSON.stringify(body);
+  } catch {
+    return res.statusText;
+  }
+}
+
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const {
     data: { session },
@@ -25,6 +35,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (init.body) headers.set('Content-Type', 'application/json');
 
   const res = await fetch(`${config.apiUrl}${path}`, { ...init, headers });
-  if (!res.ok) throw new ApiError(res.status, `${res.status} ${await res.text()}`);
+  if (!res.ok) throw new ApiError(res.status, await errorText(res));
+  if (res.status === 204) return undefined as T; // no content (deletes)
   return res.json() as Promise<T>;
 }
