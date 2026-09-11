@@ -23,3 +23,24 @@ async def test_health_db_reaches_supabase(client, make_token):
     r = await client.get("/health/db", headers={"Authorization": f"Bearer {make_token()}"})
     assert r.status_code == 200, r.text
     assert r.json()["database"] == "reachable"
+
+
+async def test_cors_allows_expo_web_dev_origin(client):
+    r = await client.options(
+        "/me",
+        headers={
+            "Origin": "http://localhost:8081",
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "authorization,x-timezone",
+        },
+    )
+    assert r.status_code == 200
+    assert r.headers["access-control-allow-origin"] == "http://localhost:8081"
+
+
+async def test_cors_rejects_unknown_origin(client):
+    r = await client.options(
+        "/me",
+        headers={"Origin": "https://evil.example", "Access-Control-Request-Method": "GET"},
+    )
+    assert "access-control-allow-origin" not in r.headers

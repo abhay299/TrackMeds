@@ -19,6 +19,13 @@ class Settings(BaseSettings):
     supabase_url: str  # https://<project-ref>.supabase.co
     database_url: str  # postgresql+asyncpg://... via the Supavisor pooler host
     jwt_audience: str = "authenticated"  # Supabase sets this for every signed-in user
+    # Browser origins allowed to call the API (native apps are not subject to CORS).
+    # Comma-separated; defaults cover Expo's web dev server.
+    cors_origins: str = "http://localhost:8081,http://127.0.0.1:8081"
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
     @property
     def jwks_url(self) -> str:
