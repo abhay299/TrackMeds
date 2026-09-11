@@ -1,0 +1,16 @@
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+# secrets
+.env
+.env.*
+!.env.example
+# js (apps/ and packages/ add their own)
+node_modules/
+# os / editors
+.DS_Store
+.idea/
+.vscode/
