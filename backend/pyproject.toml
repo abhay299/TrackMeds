@@ -10,6 +10,7 @@ dependencies = [
     "sqlalchemy[asyncio]>=2.0",
     "asyncpg>=0.29",
     "pyjwt[crypto]>=2.9",
+    "python-dateutil>=2.9.0.post0",
 ]
 
 [dependency-groups]
@@ -34,3 +35,6 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"]  # tabular test data reads better unwrapped
