@@ -11,6 +11,7 @@ dependencies = [
     "asyncpg>=0.29",
     "pyjwt[crypto]>=2.9",
     "python-dateutil>=2.9.0.post0",
+    "alembic>=1.19.2",
 ]
 
 [dependency-groups]
