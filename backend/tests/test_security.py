@@ -2,23 +2,27 @@ import time
 
 from cryptography.hazmat.primitives.asymmetric import ec
 
-from tests.conftest import USER_ID
+from app.core.config import get_settings
+from app.core.security import verify_token
+from tests.conftest import USER_ID, FakeJWKS
 
 
 def auth(token: str) -> dict[str, str]:
     return {"Authorization": f"Bearer {token}"}
 
 
+def test_valid_token_yields_the_user_identity(signing_key, make_token):
+    # The verify step is exercised directly: no HTTP, no database. The endpoints
+    # that consume the identity are covered by the API tests.
+    user = verify_token(make_token(), get_settings(), FakeJWKS(signing_key.public_key()))
+    assert user.id == USER_ID
+    assert user.email == "abhay@example.com"
+
+
 async def test_missing_token_is_401_with_challenge(client):
     r = await client.get("/me")
     assert r.status_code == 401
     assert r.headers["www-authenticate"] == "Bearer"
-
-
-async def test_valid_token_returns_identity(client, make_token):
-    r = await client.get("/me", headers=auth(make_token()))
-    assert r.status_code == 200
-    assert r.json() == {"id": USER_ID, "email": "abhay@example.com"}
 
 
 async def test_expired_token_rejected(client, make_token):

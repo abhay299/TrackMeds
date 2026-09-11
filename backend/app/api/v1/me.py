@@ -1,18 +1,20 @@
 from fastapi import APIRouter
-from pydantic import BaseModel
 
-from app.core.security import CurrentUser
+from app.api.deps import Me
+from app.core.db import DbSession
+from app.schemas import ProfileOut, ProfilePatch
 
 router = APIRouter(tags=["me"])
 
 
-class Me(BaseModel):
-    id: str
-    email: str | None
+@router.get("/me", response_model=ProfileOut)
+async def read_me(profile: Me) -> ProfileOut:
+    return ProfileOut.model_validate(profile)
 
 
-@router.get("/me", response_model=Me)
-async def read_me(user: CurrentUser) -> Me:
-    # Phase 0: identity straight from the verified token — proves auth end to end.
-    # Phase 1: becomes the `profiles` row (timezone, grace), auto-created on first call.
-    return Me(id=user.id, email=user.email)
+@router.patch("/me", response_model=ProfileOut)
+async def update_me(patch: ProfilePatch, profile: Me, db: DbSession) -> ProfileOut:
+    for field, value in patch.model_dump(exclude_unset=True).items():
+        setattr(profile, field, value)
+    await db.commit()
+    return ProfileOut.model_validate(profile)

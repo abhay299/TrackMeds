@@ -1,0 +1,18 @@
+# Throwaway Postgres for the API test-suite (and local dev if you prefer it to
+# Supabase). Data lives in tmpfs: gone on `docker compose down`, by design.
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: trackmeds
+      POSTGRES_PASSWORD: trackmeds
+      POSTGRES_DB: trackmeds_test
+    ports:
+      - "54329:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trackmeds -d trackmeds_test"]
+      interval: 2s
+      timeout: 2s
+      retries: 15

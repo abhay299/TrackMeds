@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.api.v1 import me
+from app.api.v1 import doses, me, medications
 from app.core.config import get_settings
 from app.core.db import DbSession
 from app.core.security import CurrentUser
@@ -51,3 +51,5 @@ async def health_db(_: CurrentUser, db: DbSession) -> dict[str, str]:
 
 
 app.include_router(me.router)
+app.include_router(medications.router)
+app.include_router(doses.router)
