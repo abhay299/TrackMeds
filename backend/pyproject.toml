@@ -1,7 +1,7 @@
 [project]
-name = "medtrack-backend"
+name = "trackmeds-backend"
 version = "0.1.0"
-description = "medtrack API — FastAPI backend for the medication reminder app"
+description = "TrackMeds API — FastAPI backend for the medication reminder app"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115",

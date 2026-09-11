@@ -22,7 +22,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     yield
 
 
-app = FastAPI(title="medtrack API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="TrackMeds API", version="0.1.0", lifespan=lifespan)
 
 
 @app.get("/health")

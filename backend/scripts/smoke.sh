@@ -10,7 +10,7 @@
 set -euo pipefail
 
 SUPABASE_URL="${SUPABASE_URL:-https://avjppsqqyvehsevzbvjh.supabase.co}"
-API_URL="${API_URL:-https://medtrack-api-601010886738.asia-south1.run.app}"
+API_URL="${API_URL:-https://trackmeds-api-601010886738.asia-south1.run.app}"
 
 read -r  -p "Supabase publishable key (sb_publishable_...): " KEY
 read -r  -p "Login email: " EMAIL

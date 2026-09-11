@@ -27,7 +27,7 @@ export default function SignIn() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.form}
       >
-        <Text variant="displaySmall">medtrack</Text>
+        <Text variant="displaySmall">TrackMeds</Text>
         <Text variant="bodyLarge" style={styles.subtitle}>
           Sign in with the account you were given.
         </Text>

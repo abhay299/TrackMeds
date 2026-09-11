@@ -15,7 +15,7 @@ set -euo pipefail
 : "${SUPABASE_URL:?export SUPABASE_URL=https://<ref>.supabase.co}"
 
 REGION=asia-south1          # Mumbai — Tier 1 pricing, same as Iowa
-SERVICE=medtrack-api
+SERVICE=trackmeds-api
 
 gcloud run deploy "$SERVICE" \
   --project "$GCP_PROJECT" \
@@ -31,7 +31,7 @@ gcloud run deploy "$SERVICE" \
   --concurrency 80 \
   --timeout 60 \
   --set-env-vars "APP_ENV=prod,SUPABASE_URL=${SUPABASE_URL}" \
-  --set-secrets "DATABASE_URL=medtrack-database-url:latest"
+  --set-secrets "DATABASE_URL=trackmeds-database-url:latest"
 
 gcloud run services describe "$SERVICE" --project "$GCP_PROJECT" --region "$REGION" \
   --format 'value(status.url)'

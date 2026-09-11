@@ -1,6 +1,6 @@
-# Medication Reminder App — End-to-End Plan
+# TrackMeds — End-to-End Plan
 
-Working name: **medtrack** (rename any time; it only affects folder/app names).
+App name: **TrackMeds**.
 
 ## Context
 
@@ -137,7 +137,7 @@ trigger: app foregrounded · schedule changed · dose logged · notification act
   cancelAllScheduledNotifications()                      -- simplest idempotent strategy
   for g in groups[:200]:                                  -- Android caps ~500 alarms/app
       schedule(at=g.at, title=g.title, body=g.body, data=g.instances, category="DOSE", exact=true)
-  schedule(at=now+12d, "Open medtrack to keep reminders going")
+  schedule(at=now+12d, "Open TrackMeds to keep reminders going")
 ```
 
 - Actions on the notification: **Take · Snooze 10 min · Skip** → `POST /doses/log` per instance (snooze = one-off local notification with the same payload). Cold-launch responses handled via `getLastNotificationResponse`.
@@ -146,7 +146,7 @@ trigger: app foregrounded · schedule changed · dose logged · notification act
 - Today screen renders from a persisted TanStack Query cache, so a Cloud Run cold start is invisible.
 - **Gate before building on it (Phase 2 spike):** schedule test notifications, then screen off + `adb shell dumpsys deviceidle force-idle` + app force-stopped + reboot. All fire within a minute → keep `expo-notifications`. Otherwise → `react-native-notify-kit` (`SET_EXACT_AND_ALLOW_WHILE_IDLE`, exposes the exact-alarm setting check that expo-notifications lacks).
 
-## Repo layout (monorepo, `~/dev/medtrack`)
+## Repo layout (monorepo, `~/dev/TrackMeds`)
 
 ```
 backend/

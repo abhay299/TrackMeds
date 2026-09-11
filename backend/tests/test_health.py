@@ -15,8 +15,8 @@ async def test_health_db_requires_auth(client):
 
 
 @pytest.mark.skipif(
-    not os.environ.get("MEDTRACK_INTEGRATION"),
-    reason="needs a real DATABASE_URL; run with MEDTRACK_INTEGRATION=1",
+    not os.environ.get("TRACKMEDS_INTEGRATION"),
+    reason="needs a real DATABASE_URL; run with TRACKMEDS_INTEGRATION=1",
 )
 async def test_health_db_reaches_supabase(client, make_token):
     # Integration check for Phase 0's exit criterion: pooler host, TLS, credentials.

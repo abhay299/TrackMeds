@@ -1,6 +1,6 @@
-# medtrack API
+# TrackMeds API
 
-FastAPI backend. Phase 0: health check + Supabase JWT verification + DB reachability.
+FastAPI backend for TrackMeds. Verifies Supabase-issued JWTs locally (JWKS) and talks to Supabase Postgres through the session pooler.
 
 ## Run locally
 
@@ -14,51 +14,49 @@ curl localhost:8000/health
 ## Test
 
 ```sh
-uv run pytest                          # unit tests, no network, no DB
-MEDTRACK_INTEGRATION=1 uv run pytest   # also hits the real database via /health/db
+uv run pytest                           # unit tests, no network, no DB
+TRACKMEDS_INTEGRATION=1 uv run pytest   # also hits the real database via /health/db
 uv run ruff check . && uv run ruff format --check .
 ```
 
 ## Container
 
 ```sh
-docker build -t medtrack-api .
-docker run --rm -p 8080:8080 --env-file .env medtrack-api
+docker build -t trackmeds-api .
+docker run --rm -p 8080:8080 --env-file .env trackmeds-api
 ```
 
-## Deploy to Cloud Run (one-time setup, then `./deploy.sh`)
+## Deploy to Cloud Run
+
+One-time setup for a new GCP project:
 
 ```sh
 brew install --cask google-cloud-sdk
-gcloud auth login && gcloud config set project "$GCP_PROJECT"
+gcloud auth login
+export GCP_PROJECT=<project id>          # currently: medtrack-api
+gcloud config set project "$GCP_PROJECT"
 gcloud services enable run.googleapis.com cloudbuild.googleapis.com \
     artifactregistry.googleapis.com secretmanager.googleapis.com
 
-# The DB password lives in Secret Manager, never in a flag or a file in git.
-printf '%s' "$DATABASE_URL" | gcloud secrets create medtrack-database-url --data-file=-
+# Cloud Build runs as the default compute service account; new projects grant it nothing.
 PROJECT_NUMBER=$(gcloud projects describe "$GCP_PROJECT" --format 'value(projectNumber)')
-gcloud secrets add-iam-policy-binding medtrack-database-url \
-    --member "serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
-    --role roles/secretmanager.secretAccessor
+SA="${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
+gcloud projects add-iam-policy-binding "$GCP_PROJECT" --member "serviceAccount:$SA" --role roles/cloudbuild.builds.builder
 
-# Budget alert at $1 (Console → Billing → Budgets & alerts), then:
-export GCP_PROJECT=... SUPABASE_URL=...
-./deploy.sh
+# The database URL lives in Secret Manager, never in a flag or a file in git.
+printf '%s' "$DATABASE_URL" | gcloud secrets create trackmeds-database-url --data-file=-
+gcloud secrets add-iam-policy-binding trackmeds-database-url --member "serviceAccount:$SA" --role roles/secretmanager.secretAccessor
+
+# Set a small budget alert on the billing account (Console → Billing → Budgets & alerts).
 ```
 
-After the first deploy, add an Artifact Registry cleanup policy (keep the 3 newest
-images) on the `cloud-run-source-deploy` repository so old builds don't accumulate.
+Every deploy after that:
 
-## Current deployment (Phase 0, 2026-09-11)
+```sh
+export GCP_PROJECT=<project id> SUPABASE_URL=https://<ref>.supabase.co
+./deploy.sh                  # prints the service URL; flags are pinned for scale-to-zero, request-based billing
+scripts/smoke.sh             # signs in as a real user and calls /me and /health/db on the deployed service
+```
 
-| | |
-|---|---|
-| GCP project | `medtrack-api` (billing account in INR; ₹90 gross-spend budget alert, 50/90/100 %) |
-| Cloud Run | `medtrack-api`, `asia-south1`, https://medtrack-api-601010886738.asia-south1.run.app |
-| Build | `gcloud run deploy --source` → Cloud Build → Artifact Registry `cloud-run-source-deploy` (keeps 3 newest images) |
-| Build identity | default compute service account with `roles/cloudbuild.builds.builder` (new projects grant nothing by default) |
-| Secrets | `medtrack-database-url` in Secret Manager; runtime SA has `secretAccessor` |
-| Supabase | project `avjppsqqyvehsevzbvjh`, Mumbai; ES256 signing keys; sign-ups disabled |
-
-Rotate the DB password: Supabase → Settings → Database → reset, then
-`printf '%s' "$NEW_URL" | gcloud secrets versions add medtrack-database-url --data-file=-` and update `.env`.
+To rotate the database password: reset it in Supabase, then
+`printf '%s' "$NEW_URL" | gcloud secrets versions add trackmeds-database-url --data-file=-` and update `.env`.

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "medtrack",
-    "slug": "medtrack",
+    "name": "TrackMeds",
+    "slug": "trackmeds",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -17,7 +17,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.medtrack.app"
+      "package": "com.trackmeds.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -27,6 +27,6 @@
       "expo-status-bar",
       "expo-font"
     ],
-    "scheme": "medtrack"
+    "scheme": "trackmeds"
   }
 }
