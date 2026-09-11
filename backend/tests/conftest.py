@@ -18,8 +18,11 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from httpx import ASGITransport, AsyncClient
 
 # Settings are read lazily, so this runs before the app ever instantiates them.
-os.environ.setdefault("SUPABASE_URL", "https://test-project.supabase.co")
-os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://x:y@localhost:5432/test")
+# Unit tests get placeholders; environment variables outrank `.env`, so in
+# integration mode we leave them unset and let Settings read the real `.env`.
+if not os.environ.get("TRACKMEDS_INTEGRATION"):
+    os.environ.setdefault("SUPABASE_URL", "https://test-project.supabase.co")
+    os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://x:y@localhost:5432/test")
 
 from app.core.config import get_settings  # noqa: E402
 from app.core.security import get_jwks  # noqa: E402
